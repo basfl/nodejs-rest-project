@@ -39,12 +39,18 @@ exports.createPost = (req, res, next) => {
         throw error;
         //  return res.status(422).json({ message: "validation failed!!", errors: errors.array() })
     }
+    if(!req.file){
+        const error = new Error("No image found!!");
+        error.statusCode = 422;
+        throw error;
+    }
+    const imageUrl = req.file.path.replace("\\" ,"/");
     const title = req.body.title;
     const content = req.body.content;
     const post = new Post({
         title: title,
         content: content,
-        imageUrl: 'images/test.jpg',
+        imageUrl: imageUrl,
         creator: { name: 'bob' }
     });
     post.save().then(result => {
