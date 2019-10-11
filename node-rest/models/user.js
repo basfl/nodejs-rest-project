@@ -1,5 +1,5 @@
-const moongoose = require('mongoose');
-const Schema = moongoose.Schema;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 const userSchema = new Schema(
     {
         email: {
@@ -16,7 +16,7 @@ const userSchema = new Schema(
         },
         status: {
             type: String,
-            require: true
+            default: "I am New"
         },
         posts: [
             {
