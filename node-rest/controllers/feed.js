@@ -12,7 +12,7 @@ exports.getPosts = (req, res, next) => {
     Post.find().countDocuments()
         .then(count => {
             totalItems = count;
-            return Post.find().skip((currentPage - 1) * perPage).limit(perPage);
+            return Post.find().populate("creator").skip((currentPage - 1) * perPage).limit(perPage);
         })
         .then(posts => {
             console.log("posts->", posts)
@@ -76,8 +76,11 @@ exports.createPost = (req, res, next) => {
         creator = user;
         user.posts.push(post);
         return user.save();
-    }).then(result => {
-        io.getIo().emit("posts", { action: 'create', post: post })
+    }).then(user => {
+        io.getIo().emit("posts", {
+            action: 'create', post:
+                { ...post._doc, creator: { _id: req.userId, name: user.name } }
+        })
         res.status(201).json({
             message: "post created succesfully!!",
             post: post,
