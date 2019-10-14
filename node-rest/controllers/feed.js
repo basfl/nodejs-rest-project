@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator/check');
 const Post = require('../models/post');
 const User = require("../models/user");
+const io = require("../socket");
 const fs = require("fs");
 const path = require("path");
 exports.getPosts = (req, res, next) => {
@@ -76,6 +77,7 @@ exports.createPost = (req, res, next) => {
         user.posts.push(post);
         return user.save();
     }).then(result => {
+        io.getIo().emit("posts", { action: 'create', post: post })
         res.status(201).json({
             message: "post created succesfully!!",
             post: post,
@@ -112,7 +114,7 @@ exports.getPost = (req, res, next) => {
 
 exports.updatePost = (req, res, next) => {
     const postId = req.params.postId;
-    
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         const error = new Error('Validation failed, entered data is incorrect.');
@@ -164,7 +166,7 @@ exports.updatePost = (req, res, next) => {
 
 exports.deletePost = (req, res, next) => {
     const postId = req.params.postId;
-    console.log("----",postId);
+    console.log("----", postId);
     Post.findById(postId)
         .then(post => {
             if (!post) {
