@@ -12,7 +12,7 @@ exports.getPosts = (req, res, next) => {
     Post.find().countDocuments()
         .then(count => {
             totalItems = count;
-            return Post.find().populate("creator").skip((currentPage - 1) * perPage).limit(perPage);
+            return Post.find().populate("creator").sort({ createdAt: -1 }).skip((currentPage - 1) * perPage).limit(perPage);
         })
         .then(posts => {
             console.log("posts->", posts)
@@ -157,7 +157,7 @@ exports.updatePost = (req, res, next) => {
             return post.save();
         })
         .then(result => {
-            
+
             io.getIo().emit('posts', { action: 'update', post: result });
             res.status(200).json({ message: 'Post updated!', post: result });
         })
@@ -193,6 +193,7 @@ exports.deletePost = (req, res, next) => {
         })
         .then(user => {
             user.posts.pull(postId);
+            io.getIo().emit('posts', { action: 'delete', post: postId });
             return user.save();
         })
         .then(result => {
